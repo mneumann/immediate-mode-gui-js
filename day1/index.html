@@ -4,11 +4,24 @@
 		<canvas id="canvas" width="640" height="480" style="border: 1px solid black;" />
 		<script>
 			function drawButton(ctx, x, y, w, h, label, pressed) {
-				ctx.fillStyle = pressed ? '#ddd' : '#eee';
+				ctx.lineWidth = 1;
+
+				ctx.fillStyle = '#eee';
 				ctx.fillRect(x, y, w, h);
 
-				ctx.strokeStyle = 'black';
-				ctx.strokeRect(x, y, w, h);
+				ctx.beginPath();
+				ctx.moveTo(x+1, y+h-1);
+				ctx.lineTo(x+w-1, y+h-1);
+				ctx.lineTo(x+w-1, y+1);
+				ctx.strokeStyle = pressed ? '#ddd' : 'black';
+				ctx.stroke();
+
+				ctx.beginPath();
+				ctx.moveTo(x+1, y+h-1);
+				ctx.lineTo(x+1, y+1);
+				ctx.lineTo(x + w - 1, y+1);
+				ctx.strokeStyle = pressed ? 'black' : '#ddd';
+				ctx.stroke();
 
 				ctx.fillStyle = 'black';
 				ctx.font = '12px serif';
@@ -108,6 +121,7 @@
 			canvas.onmousedown = assignMouseButton(uiContext, true, main);
 			canvas.onmouseup = assignMouseButton(uiContext, false, main);
 
+			main(uiContext);
 		</script>
 	</body>
 </html>
