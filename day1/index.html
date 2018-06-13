@@ -4,7 +4,7 @@
 		<canvas id="canvas" width="640" height="480" style="border: 1px solid black;" />
 		<script>
 			function drawButton(ctx, x, y, w, h, label, pressed) {
-				ctx.fillStyle = '#eee';
+				ctx.fillStyle = pressed ? '#ddd' : '#eee';
 				ctx.fillRect(x, y, w, h);
 
 				ctx.strokeStyle = 'black';
@@ -13,17 +13,57 @@
 				ctx.fillStyle = 'black';
 				ctx.font = '12px serif';
 				ctx.textAlign = 'center';
-				var offset = pressed ? 5 : 0;
+				ctx.textBaseline = 'middle';
+				var offset = pressed ? 2 : 0;
 				var px = x + w/2;
 				var py = y + h/2;
 				ctx.fillText(label, px + offset, py + offset);
 			}
-		
+
+			function containsPoint(x, y, w, h, px, py) {
+				if (typeof px === 'undefined' || typeof py ===
+					'undefined') return false;
+				return (px >= x && py >= y && px < x + w && py < y + h);
+			}
+	
+			function button(uiCtx, id, x, y, w, h, label) {
+				var didClick = false;
+				var drawPressed = false;
+
+				if (containsPoint(x, y, w, h, uiCtx.mx, uiCtx.my)) {
+					if (uiCtx.activeWidgetId === id) {
+						// The button received a mouse click before
+						if (uiCtx.mbLeft === false) {
+							// button was released over the button.
+							uiCtx.activeWidgetId = undefined;
+							didClick = true;
+						} else {
+							// Left mouse button not released yet.
+							drawPressed = true;
+						}
+					} else if (uiCtx.mbLeft === true) {
+						uiCtx.activeWidgetId = id;
+						drawPressed = true;
+					}
+				}
+
+				drawButton(uiCtx.ctx, x, y, w, h, label, drawPressed);
+				return didClick;
+			}
+
 			function main(uiCtx) { 
 				var ctx = uiCtx.ctx;
 				ctx.fillStyle = 'white';
 				ctx.fillRect(0, 0, 640, 480);
-				drawButton(ctx, 10, 10, 200, 100, "Click me", false);
+				if (button(uiCtx, "button1", 10, 10, 100, 40, "A")) {
+					console.log("A");
+				}
+				if (button(uiCtx, "button2", 120, 10, 100, 40, "B")) {
+					console.log("B");
+				}
+				if (button(uiCtx, "button3", 230, 10, 100, 40, "C")) {
+					console.log("C");
+				}
 			}
 		</script>
 		<script>
@@ -32,34 +72,42 @@
 			var uiContext = {
 				mx: undefined,
 				my: undefined,
-				mb: undefined,
-				ctx: canvas.getContext("2d")
+				mbLeft: undefined,
+				mbMiddle: undefined,
+				mbRight: undefined,
+				ctx: canvas.getContext("2d"),
+				activeWidgetId: undefined
 			};
 
 			canvas.onmousemove = function(ev) {
-				uiContext.mx = ev.clientX;
-				uiContext.my = ev.clientY;
+				uiContext.mx = ev.offsetX;
+				uiContext.my = ev.offsetY;
 				main(uiContext);
 			};
-			canvas.onmousedown = function(ev) {
-				uiContext.mx = ev.clientX;
-				uiContext.my = ev.clientY;
-				switch (ev.button) {
-					// left
-					case 0: 
-						uiContext.mb = 1;
-						break;
-					// middle
-					case 1:
-						uiContext.mb = 2;
-						break;
-					// right
-					case 2:
-						uiContext.mb = 4;
-						break;
-				}
-				main(uiContext);
-			};
+			function assignMouseButton(uiContext, state, renderFn) {
+				return function(ev) {
+					uiContext.mx = ev.offsetX;
+					uiContext.my = ev.offsetY;
+					switch (ev.button) {
+							// left
+						case 0: 
+							uiContext.mbLeft = state;
+							break;
+							// middle
+						case 1:
+							uiContext.mbMiddle = state;
+							break;
+							// right
+						case 2:
+							uiContext.mbRight = state;
+							break;
+					}
+					renderFn(uiContext);
+				};
+			}
+			canvas.onmousedown = assignMouseButton(uiContext, true, main);
+			canvas.onmouseup = assignMouseButton(uiContext, false, main);
+
 		</script>
 	</body>
 </html>
