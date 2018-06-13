@@ -18,11 +18,48 @@
 				var py = y + h/2;
 				ctx.fillText(label, px + offset, py + offset);
 			}
+		
+			function main(uiCtx) { 
+				var ctx = uiCtx.ctx;
+				ctx.fillStyle = 'white';
+				ctx.fillRect(0, 0, 640, 480);
+				drawButton(ctx, 10, 10, 200, 100, "Click me", false);
+			}
 		</script>
 		<script>
 			var canvas = document.getElementById("canvas");
-			var ctx = canvas.getContext("2d");
-			drawButton(ctx, 10, 10, 200, 100, "Click me", false);
+
+			var uiContext = {
+				mx: undefined,
+				my: undefined,
+				mb: undefined,
+				ctx: canvas.getContext("2d")
+			};
+
+			canvas.onmousemove = function(ev) {
+				uiContext.mx = ev.clientX;
+				uiContext.my = ev.clientY;
+				main(uiContext);
+			};
+			canvas.onmousedown = function(ev) {
+				uiContext.mx = ev.clientX;
+				uiContext.my = ev.clientY;
+				switch (ev.button) {
+					// left
+					case 0: 
+						uiContext.mb = 1;
+						break;
+					// middle
+					case 1:
+						uiContext.mb = 2;
+						break;
+					// right
+					case 2:
+						uiContext.mb = 4;
+						break;
+				}
+				main(uiContext);
+			};
 		</script>
 	</body>
 </html>
