@@ -3,14 +3,26 @@
 		<h1>Immediate Mode GUI in Javascript - Day 1</h1>
 		<canvas id="canvas" width="640" height="480" style="border: 1px solid black;" />
 		<script>
+			function drawButton(ctx, x, y, w, h, label, pressed) {
+				ctx.fillStyle = '#eee';
+				ctx.fillRect(x, y, w, h);
+
+				ctx.strokeStyle = 'black';
+				ctx.strokeRect(x, y, w, h);
+
+				ctx.fillStyle = 'black';
+				ctx.font = '12px serif';
+				ctx.textAlign = 'center';
+				var offset = pressed ? 5 : 0;
+				var px = x + w/2;
+				var py = y + h/2;
+				ctx.fillText(label, px + offset, py + offset);
+			}
+		</script>
+		<script>
 			var canvas = document.getElementById("canvas");
 			var ctx = canvas.getContext("2d");
-			ctx.drawLine = function(x, y, w, h) {
-				this.moveTo(x, y);
-				this.lineTo(x+w, x+h);
-			};
-			ctx.drawLine(0,0, 640, 480);
-			ctx.stroke();
+			drawButton(ctx, 10, 10, 200, 100, "Click me", false);
 		</script>
 	</body>
 </html>
